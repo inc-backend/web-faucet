@@ -1,0 +1,249 @@
+#modal {
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  background-color: #000;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  z-index: 100;
+}
+.root-container {
+  background-color: #111111;
+  padding: 20px 20%;
+}
+.table-container {
+  background-color: #111111;
+  padding: 0px 20% 80px 20%;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.btn-header {
+  border-radius: 20px !important;
+  color: white !important;
+  background-color: #111111 !important;
+  border-color: #111111 !important;
+  background: #111111 !important;
+  margin-left: 5px;
+}
+.desktop {
+  display: table-cell;
+}
+.mobile {
+  display: none;
+}
+.desktop-text {
+  display: block;
+}
+.mobile-text {
+  display: none;
+}
+.header-text {
+  padding: 40px;
+  color: #fff;
+  text-align: center;
+}
+
+.table-content {
+  font-size: 15px !important;
+  height: 50px;
+  color: #d8d8d8;
+}
+
+.body-container {
+  justify-content: center;
+  align-items: center;
+  display: block;
+  padding-top: 80px;
+  padding-left: 40px;
+  padding-right: 40px;
+}
+
+.airdrop-container {
+  padding-bottom: 40px;
+  padding-top: 40px;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.airdrop-label {
+  color: white;
+  text-align: center;
+  font-weight: bold;
+  line-height: 41px;
+  font-size: 35px;
+  margin-bottom: 0px;
+}
+.airdrop-rule {
+  margin-top: 30px;
+  font-size: 18px;
+  margin-bottom: 50px;
+  color: #898989;
+}
+::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #898989 !important;
+}
+
+:-ms-input-placeholder {
+  /* Internet Explorer 10-11 */
+  color: #898989 !important;
+}
+
+::-ms-input-placeholder {
+  /* Microsoft Edge */
+  color: #898989 !important;
+}
+.input-address {
+  padding: 15px 30px !important;
+  border-radius: 12px !important;
+  margin-bottom: 20px !important;
+  height: 60px;
+  font-size: 18px !important;
+  width: 549px !important;
+  color: white !important;
+  border-width: 1.75px !important;
+  border-color: #3f3f3f !important;
+  background: #111111 !important;
+}
+
+input[type="text"]:focus {
+  border-width: 1.75px !important;
+  border-color: #3f3f3f !important;
+}
+
+.error-message {
+  color: #e02020;
+  margin-bottom: 0 !important;
+  font-size: 15px !important;
+}
+.btn-faucet {
+  margin-top: 50px !important;
+  padding: 15px 40px !important;
+  border-radius: 30px !important;
+  height: 60px !important;
+  width: 244px;
+  color: white !important;
+  border-color: #333335 !important;
+  background: #333335 !important;
+}
+.ant-btn-lg {
+  font-size: 18px !important;
+}
+.table-requests {
+  font-size: 18px !important;
+  width: 100%;
+}
+.request-queue {
+  color: white;
+  text-align: left;
+  font-weight: bold;
+  font-size: 18px;
+}
+.table-content td:first-child {
+  padding-left: 20px;
+}
+/* .table-content td:last-child {
+  padding-right: 10px;
+} */
+
+.table-requests th:first-child {
+  padding-left: 20px;
+}
+/* .table-requests th:last-child {
+  padding-right: 10px;
+} */
+@media only screen and (max-width: 600px) {
+  .desktop-text {
+    display: none;
+  }
+  .mobile-text {
+    display: block;
+  }
+  .root-container {
+    padding: 20px !important;
+  }
+  .airdrop-container {
+    padding-top: 80px;
+    padding-bottom: 30px;
+  }
+  .table-container {
+    padding: 0 0 50px 0 !important;
+  }
+  .body-container {
+    padding: 0 !important;
+  }
+  .airdrop-label {
+    font-size: 20px !important;
+    line-height: 25px !important;
+  }
+  .airdrop-rule {
+    font-size: 15px !important;
+    margin-top: 15px;
+    line-height: 20px !important;
+  }
+  .input-address {
+    height: 45px !important;
+    margin-bottom: 10px !important;
+    width: 100% !important;
+    font-size: 15px !important;
+    border-width: 1px !important;
+    padding: 5px 15px !important;
+  }
+  .btn-faucet {
+    height: 45px !important;
+    width: 100% !important;
+    font-size: 15px !important;
+    padding: 7px !important;
+    margin-top: 10px !important;
+  }
+  .table-requests {
+    font-size: 13px !important;
+  }
+  .table-content {
+    height: 45px;
+    font-size: 13px !important;
+  }
+  .error-message {
+    text-align: left !important;
+    font-size: 13px !important;
+    margin-bottom: 20px !important;
+  }
+  .desktop {
+    display: none;
+  }
+  .mobile {
+    display: table-cell;
+  }
+  .request-queue {
+    font-size: 15px;
+    margin-left: 20px;
+  }
+  .logo {
+    width: 30px;
+    height: 30px;
+  }
+
+  .table-content td:first-child {
+    padding-left: 10px;
+  }
+  .table-content td:last-child {
+    padding-right: 5px;
+  }
+
+  .table-requests th:first-child {
+    padding-left: 10px;
+  }
+  .table-requests th:last-child {
+    padding-right: 5px;
+  }
+  .btn-header{
+    padding-right: 0 !important;
+  }
+}
