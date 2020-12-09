@@ -2,7 +2,7 @@ import React from "react";
 import axios from "axios";
 import { Button, Input, notification } from "antd";
 import "./App.css";
-
+const api = process.env.REACT_APP_API_URL;
 const renderAmount = (amount) => {
   return Number(amount) / 1e9;
 };
@@ -24,7 +24,7 @@ class App extends React.Component {
   getRequest = async () => {
     const requests = await axios({
       method: "get",
-      url: "http://192.168.1.62:8081/faucet?page=1&limit=10",
+      url: `${api}/faucet`,
     });
     this.setState({
       requests: requests.data.Data,
@@ -42,7 +42,7 @@ class App extends React.Component {
       const { address } = this.state;
       const res = await axios({
         method: "post",
-        url: "http://localhost:8081/faucet",
+        url: `${api}/faucet`,
         data: {
           Address: address,
           Amount: 10,
@@ -72,10 +72,10 @@ class App extends React.Component {
     }
   };
   render() {
-    const { error, creatingTx, address, requests, isModalVisible } = this.state;
+    const { error, creatingTx, address, requests } = this.state;
     return (
-      <React.Fragment>
-        {isModalVisible && (
+      <div>
+        {/* {isModalVisible && (
           <div id="modal">
             <button
               onClick={() => this.setState({ isModalVisible: !isModalVisible })}
@@ -83,7 +83,7 @@ class App extends React.Component {
               Toglge modal
             </button>
           </div>
-        )}
+        )} */}
         <div className="root-container">
           <div className="header-container">
             <img className="logo" src={"./logo.svg"} alt="logo"></img>
@@ -178,7 +178,7 @@ class App extends React.Component {
             </tbody>
           </table>
         </div>
-      </React.Fragment>
+      </div>
     );
   }
 }
