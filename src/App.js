@@ -89,7 +89,7 @@ class App extends React.Component {
             <img className="logo" src={"./logo.svg"} alt="logo"></img>
             <div>
               {/* <button onClick={() => this.setState({isModalVisible: !isModalVisible})}>Toglge modal</button> */}
-              <Button className="btn-header">Testnet Faucet</Button>
+              <p className="btn-header">Testnet Faucet</p>
               {/* <Button className="btn-header">Docs</Button> */}
               {/* <Button className="btn-header">Community</Button> */}
             </div>
