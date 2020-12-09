@@ -10,6 +10,10 @@
   overflow-y: scroll;
   z-index: 100;
 }
+.root {
+  height: 100vh;
+  background-color: #111111;
+}
 .root-container {
   background-color: #111111;
   padding: 20px 20%;
@@ -243,7 +247,7 @@ input[type="text"]:focus {
   .table-requests th:last-child {
     padding-right: 5px;
   }
-  .btn-header{
+  .btn-header {
     padding-right: 0 !important;
   }
 }

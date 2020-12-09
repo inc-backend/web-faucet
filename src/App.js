@@ -74,7 +74,7 @@ class App extends React.Component {
   render() {
     const { error, creatingTx, address, requests } = this.state;
     return (
-      <div>
+      <div className='root'>
         {/* {isModalVisible && (
           <div id="modal">
             <button
