@@ -155,6 +155,7 @@ workflows:
               only:
                 - develop
                 - master
+                - main
       - deploy_staging:
           context: Inc-Backend
           requires:
@@ -164,3 +165,4 @@ workflows:
               only:
                 - develop
                 - master
+                - main
