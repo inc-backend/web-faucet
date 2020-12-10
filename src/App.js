@@ -2,13 +2,15 @@ import React from "react";
 import axios from "axios";
 import { Button, Input, notification } from "antd";
 import "./App.css";
+import QrReader from "react-qr-reader";
+
 const api = process.env.REACT_APP_API_URL;
 const renderAmount = (amount) => {
   return Number(amount) / 1e9;
 };
-const renderAddress = (address, left) => {
+const renderAddress = (address, left, right) => {
   const first = address.substring(0, left);
-  const last = address.substring(address.length - 5, address.length);
+  const last = address.substring(address.length - right, address.length);
   return first + "..." + last;
 };
 class App extends React.Component {
@@ -17,7 +19,6 @@ class App extends React.Component {
     creatingTx: false,
     show: false,
     error: "",
-    result: "No result",
     isModalVisible: false,
     requests: [],
   };
@@ -33,7 +34,10 @@ class App extends React.Component {
   async componentDidMount() {
     await this.getRequest();
   }
-
+  showModel = (qrcode) => {
+    const { isModalVisible } = this.state;
+    this.setState({ isModalVisible: !isModalVisible, qrcode });
+  };
   faucet = async () => {
     try {
       this.setState({
@@ -44,14 +48,14 @@ class App extends React.Component {
         method: "post",
         url: `${api}/faucet`,
         data: {
-          Address: address,
+          Address: address.trim(),
           Amount: 10,
         },
       });
       notification.success({
         message: "Successfully",
         description:
-          "This faucet is successfully. Waiting for transaction confirm",
+          "This faucet is successfully. Waiting for transaction confirm!",
       });
       await this.getRequest();
       this.setState({
@@ -71,27 +75,107 @@ class App extends React.Component {
       });
     }
   };
+  handleScan = (data) => {
+    if (data) {
+      this.showModel(false);
+      this.setState({
+        address: data,
+      });
+    }
+  };
+  handleError = (err) => {
+    alert("Please allow camera permission for browser and this site.");
+    console.error(err);
+  };
   render() {
-    const { error, creatingTx, address, requests } = this.state;
+    const {
+      error,
+      creatingTx,
+      address,
+      requests,
+      isModalVisible,
+      qrcode,
+    } = this.state;
     return (
-      <div className='root'>
-        {/* {isModalVisible && (
-          <div id="modal">
-            <button
-              onClick={() => this.setState({ isModalVisible: !isModalVisible })}
-            >
-              Toglge modal
-            </button>
+      <div className="root">
+        {isModalVisible && (
+          <div className="root-container" id="modal">
+            <div className="header-container">
+              <img className="logo" src={"./logo.svg"} alt="logo"></img>
+              <img
+                onClick={() => this.showModel(false)}
+                className="close"
+                src={"./close.svg"}
+                alt="close"
+              ></img>
+            </div>
+            {qrcode ? (
+              <div className="camera">
+                <QrReader
+                  delay={300}
+                  onError={this.handleError}
+                  onScan={this.handleScan}
+                  style={{ width: "100%" }}
+                />
+              </div>
+            ) : (
+              <div className="mobile-menu">
+                <a className="btn-header" href="#top">
+                  Testnet Faucet
+                </a>
+                <a
+                  className="btn-header"
+                  href="https://docs.incognito.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Docs
+                </a>
+                <a
+                  className="btn-header"
+                  href="https://we.incognito.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Community
+                </a>
+              </div>
+            )}
           </div>
-        )} */}
+        )}
         <div className="root-container">
           <div className="header-container">
             <img className="logo" src={"./logo.svg"} alt="logo"></img>
             <div>
-              {/* <button onClick={() => this.setState({isModalVisible: !isModalVisible})}>Toglge modal</button> */}
-              <p className="btn-header">Testnet Faucet</p>
-              {/* <Button className="btn-header">Docs</Button> */}
-              {/* <Button className="btn-header">Community</Button> */}
+              <div className="mobile-text">
+                <img
+                  onClick={() => this.showModel(false)}
+                  className="menu"
+                  src={"./menu.svg"}
+                  alt="menu"
+                ></img>
+              </div>
+              <div className="desktop-text">
+                <a className="btn-header" href="#top">
+                  Testnet Faucet
+                </a>
+                <a
+                  className="btn-header"
+                  href="https://docs.incognito.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Docs
+                </a>
+                <a
+                  className="btn-header"
+                  href="https://we.incognito.org"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Community
+                </a>
+              </div>
             </div>
           </div>
           <div className="body-container">
@@ -118,6 +202,12 @@ class App extends React.Component {
                 placeholder="Enter Incognito address"
                 type="text"
               />
+              <img
+                onClick={() => this.showModel(true)}
+                className="qrcode"
+                src={"./qrcode.svg"}
+                alt="logo"
+              ></img>
               {error !== "" && <p className="error-message">{error}</p>}
               <Button
                 size="large"
@@ -145,6 +235,7 @@ class App extends React.Component {
                 <th>ID</th>
                 <th>Address</th>
                 <th>Amount</th>
+                <th>Transaction</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -158,10 +249,22 @@ class App extends React.Component {
                   >
                     <td>{item.id}</td>
                     <td className="desktop">
-                      {renderAddress(item.address, 18)}
+                      {renderAddress(item.address, 18, 5)}
                     </td>
-                    <td className="mobile">{renderAddress(item.address, 5)}</td>
+                    <td className="mobile">
+                      {renderAddress(item.address, 4, 4)}
+                    </td>
                     <td>{renderAmount(item.amount)}</td>
+                    <td>
+                      <a
+                        style={{ color: "#d8d8d8" }}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        href={`https://testnet.incognito.org/tx/${item.tx}`}
+                      >
+                        {renderAddress(item.tx, 4, 4)}
+                      </a>
+                    </td>
                     {item.status === 0 && (
                       <td style={{ color: "#FF9500" }}>Pending</td>
                     )}
