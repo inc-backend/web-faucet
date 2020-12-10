@@ -195,7 +195,7 @@ th:last-child {
 }
 @media only screen and (max-width: 600px) {
   .camera {
-    margin-top: 100px;
+    margin-top: 80px;
   }
   .camera section section div {
     box-shadow: #63DA38 0px 0px 0px 2px inset !important;
