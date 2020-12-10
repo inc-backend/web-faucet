@@ -1,0 +1,168 @@
+version: 2.1
+orbs:
+  gcr: circleci/gcp-gcr@0.7.1
+  go: circleci/go@1.3.0
+  slack: circleci/slack@4.1.1
+jobs:
+  build:
+    machine:
+      docker_layer_caching: true
+    steps:
+      - checkout
+      - gcr/gcr-auth
+      - gcr/build-image:
+          image: web-faucet
+          tag: $(echo $CIRCLE_SHA1 | cut -c -7)
+          extra_build_args: --build-arg GITHUB_TOKEN
+      - gcr/push-image:
+          image: web-faucet
+          tag: $(echo $CIRCLE_SHA1 | cut -c -7)
+  deploy_staging:
+    docker:
+      - image: gcr.io/$GOOGLE_PROJECT_ID/deployer:latest
+        auth:
+          username: _json_key
+          password: $GCLOUD_SERVICE_KEY
+        environment:
+          RELEASE: web-faucet
+          NAMESPACE: default
+    working_directory: /etc/deployments
+    steps:
+      - run: bash deploy.sh
+      - slack/notify:
+          event: fail
+          mentions: '@phuong @binh'
+          # template: basic_fail_1
+          custom: |
+            {
+              "blocks": [
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text": "Your job *${CIRCLE_JOB}* has failed ⚠️ "
+                    },
+                    "fields": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Project*:\n$CIRCLE_PROJECT_REPONAME"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Commiter*:\n${CIRCLE_USERNAME}"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Env*:\nStaging"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Commit*:\n<https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commit/${CIRCLE_SHA1}|${CIRCLE_SHA1}>"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Mentions*:\n${SLACK_PARAM_MENTIONS}"
+                      }
+                    ],
+                    "accessory": {
+                      "type": "image",
+                      "image_url": "https://assets.brandfolder.com/otz5mn-bw4j2w-6jzqo8/original/circle-logo-badge-black.png",
+                      "alt_text": "CircleCI logo"
+                    }
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "View Job"
+                        },
+                        "url": "${CIRCLE_BUILD_URL}"
+                      }
+                    ]
+                  }
+                ]
+            }
+      - slack/notify:
+          event: pass
+          # template: success_tagged_deploy_1
+          custom: |
+            {
+              "blocks": [
+                  {
+                    "type": "header",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "Deployment Successful! :tada:",
+                      "emoji": true
+                    }
+                  },
+                  {
+                    "type": "section",
+                    "fields": [
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Project*:\n$CIRCLE_PROJECT_REPONAME"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Commiter*:\n${CIRCLE_USERNAME}"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Env*:\nStaging"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Commit*:\n<https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/commit/${CIRCLE_SHA1}|${CIRCLE_SHA1}>"
+                      },
+                      {
+                        "type": "mrkdwn",
+                        "text": "*Tag*:\n$CIRCLE_TAG"
+                      }
+                    ],
+                    "accessory": {
+                      "type": "image",
+                      "image_url": "https://assets.brandfolder.com/otz5mn-bw4j2w-6jzqo8/original/circle-logo-badge-black.png",
+                      "alt_text": "CircleCI logo"
+                    }
+                  },
+                  {
+                    "type": "actions",
+                    "elements": [
+                      {
+                        "type": "button",
+                        "text": {
+                          "type": "plain_text",
+                          "text": "View Job"
+                        },
+                        "url": "${CIRCLE_BUILD_URL}"
+                      }
+                    ]
+                  }
+                ]
+            }
+workflows:
+  version: 2
+  deploy_web_faucet_staging:
+    jobs:
+      - build:
+          context: Inc-Backend
+          filters:
+            branches:
+              only:
+                - develop
+                - master
+                - main
+      - deploy_staging:
+          context: Inc-Backend
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - develop
+                - master
+                - main
