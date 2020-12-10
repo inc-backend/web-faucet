@@ -191,14 +191,14 @@ th:last-child {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 80px;
+  margin-top: 60px;
 }
 @media only screen and (max-width: 600px) {
   .camera {
     margin-top: 100px;
   }
   .camera section section div {
-    box-shadow: rgba(16, 0, 163, 0.5) 0px 0px 0px 4px inset !important;
+    box-shadow: #63DA38 0px 0px 0px 2px inset !important;
   }
   .desktop-text {
     display: none;
@@ -278,17 +278,17 @@ th:last-child {
     margin-top: 16px;
   }
   .table-content td:first-child {
-    padding-left: 10px;
+    padding-left: 13px;
   }
   .table-content td:last-child {
-    padding-right: 5px;
+    padding-right: 10px;
   }
 
   .table-requests th:first-child {
-    padding-left: 10px;
+    padding-left: 13px;
   }
   .table-requests th:last-child {
-    padding-right: 5px;
+    padding-right: 10px;
   }
   .btn-header {
     margin-bottom: 30px;

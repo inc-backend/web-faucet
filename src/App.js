@@ -99,8 +99,8 @@ class App extends React.Component {
     return (
       <div className="root">
         {isModalVisible && (
-          <div className="root-container" id="modal">
-            <div className="header-container">
+          <div className="" id="modal">
+            <div className="root-container header-container">
               <img className="logo" src={"./logo.svg"} alt="logo"></img>
               <img
                 onClick={() => this.showModel(false)}
@@ -234,7 +234,7 @@ class App extends React.Component {
               >
                 <th>ID</th>
                 <th>Address</th>
-                <th>Amount</th>
+                <th className="desktop">Amount</th>
                 <th>Transaction</th>
                 <th>Status</th>
               </tr>
@@ -252,9 +252,9 @@ class App extends React.Component {
                       {renderAddress(item.address, 18, 5)}
                     </td>
                     <td className="mobile">
-                      {renderAddress(item.address, 4, 4)}
+                      {renderAddress(item.address, 5, 5)}
                     </td>
-                    <td>{renderAmount(item.amount)}</td>
+                    <td className="desktop">{renderAmount(item.amount)}</td>
                     <td>
                       <a
                         style={{ color: "#d8d8d8" }}
@@ -262,7 +262,7 @@ class App extends React.Component {
                         rel="noopener noreferrer"
                         href={`https://testnet.incognito.org/tx/${item.tx}`}
                       >
-                        {renderAddress(item.tx, 4, 4)}
+                        {renderAddress(item.tx, 5, 5)}
                       </a>
                     </td>
                     {item.status === 0 && (
