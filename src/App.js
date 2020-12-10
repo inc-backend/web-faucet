@@ -110,6 +110,7 @@ class App extends React.Component {
               ></img>
             </div>
             {qrcode ? (
+              <div className='root-camera'>
               <div className="camera">
                 <QrReader
                   delay={300}
@@ -117,6 +118,7 @@ class App extends React.Component {
                   onScan={this.handleScan}
                   style={{ width: "100%" }}
                 />
+              </div>
               </div>
             ) : (
               <div className="mobile-menu">

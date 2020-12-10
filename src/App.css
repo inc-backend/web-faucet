@@ -193,12 +193,28 @@ th:last-child {
   align-items: center;
   margin-top: 60px;
 }
+.camera {
+  width: 70%;
+}
+.root-camera {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 20%;
+}
+.camera section section div {
+  box-shadow: #63da38 0px 0px 0px 2px inset !important;
+}
+img:hover {
+  cursor: pointer !important;
+}
 @media only screen and (max-width: 600px) {
   .camera {
+    width: 100% !important;
     margin-top: 80px;
   }
-  .camera section section div {
-    box-shadow: #63DA38 0px 0px 0px 2px inset !important;
+  .root-camera {
+    padding: 0 !important;
   }
   .desktop-text {
     display: none;
@@ -236,7 +252,6 @@ th:last-child {
     font-size: 15px !important;
     border-width: 1px !important;
     padding: 5px 40px 5px 15px !important;
-
   }
   .btn-faucet {
     height: 50px !important;
@@ -277,6 +292,7 @@ th:last-child {
     margin-left: -30px;
     margin-top: 16px;
   }
+
   .table-content td:first-child {
     padding-left: 13px;
   }
