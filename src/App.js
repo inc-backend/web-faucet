@@ -3,17 +3,23 @@ import axios from "axios";
 import { Button, Input, notification } from "antd";
 import "./App.css";
 import QrReader from "react-qr-reader";
+import { loadReCaptcha, ReCaptcha } from 'react-recaptcha-google'
 
 const api = process.env.REACT_APP_API_URL;
+const isMainnet = process.env.REACT_APP_IS_MAINNET;
 const renderAmount = (amount) => {
   return Number(amount) / 1e9;
 };
+const SITE_KEY = '6Lfo-tcbAAAAAGgrdrLFsBVywtGvQCg1K9yNMgTc';
 const renderAddress = (address, left, right) => {
   const first = address.substring(0, left);
   const last = address.substring(address.length - right, address.length);
   return first + "..." + last;
 };
 class App extends React.Component {
+  constructor(props, context) {
+    super(props, context);
+  }
   state = {
     address: "",
     creatingTx: false,
@@ -21,7 +27,19 @@ class App extends React.Component {
     error: "",
     isModalVisible: false,
     requests: [],
+    verified: false
   };
+  onLoadRecaptcha = () => {
+    if (this.captchaRef) {
+      this.captchaRef.reset();
+    }
+  }
+  verifyCallback = (recaptchaToken) => {
+    if (!recaptchaToken) return;
+    this.setState({
+      verified: true,
+    })
+  }
   getRequest = async () => {
     const requests = await axios({
       method: "get",
@@ -32,6 +50,9 @@ class App extends React.Component {
     });
   };
   async componentDidMount() {
+    if (typeof loadReCaptcha === "function" && isMainnet) {
+      return loadReCaptcha();
+    }
     await this.getRequest();
   }
   showModel = (qrcode) => {
@@ -44,20 +65,35 @@ class App extends React.Component {
         creatingTx: true,
       });
       const { address } = this.state;
-      const res = await axios({
-        method: "post",
-        url: `${api}/faucet`,
-        data: {
-          Address: address.trim(),
-          Amount: 10,
-        },
+      const res = await new Promise(async (resolve, reject) => {
+        const data = await axios({
+          method: "post",
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': '',
+          },
+          url: `${api}/tool/getprvv2`,
+          data: {
+            paymentaddress: address.trim(),
+          },
+        });
+        const result = data?.data;
+        const error = data?.data?.Error;
+        const errorMessage = data?.data?.Result;
+        if (error) {
+          return reject({
+            ...error,
+            errorMessage,
+          })
+        }
+        return resolve(result)
       });
       notification.success({
         message: "Successfully",
         description:
           "This faucet is successfully. Waiting for transaction confirm!",
       });
-      await this.getRequest();
+      // await this.getRequest();
       this.setState({
         result: res && res.data,
         creatingTx: false,
@@ -67,11 +103,9 @@ class App extends React.Component {
       this.setState({
         creatingTx: false,
         error:
-          (error &&
-            error.response &&
-            error.response.data &&
-            error.response.data.Message) ||
-          "Error, please try again!",
+            (error && error.errorMessage) ||
+            (error && error.Msg) ||
+            "Error, please try again!",
       });
     }
   };
@@ -87,27 +121,100 @@ class App extends React.Component {
     alert("Please allow camera permission for browser and this site.");
     console.error(err);
   };
+  renderRequestQueue = () => {
+    if (isMainnet) return;
+    const { requests } = this.state;
+    return (
+        <div className="table-container">
+          <p className="request-queue">Request queue</p>
+          <table className="table-requests">
+            <thead>
+            <tr
+                style={{
+                  color: "white",
+                  height: "50px",
+                  background: "#1E1E1E",
+                  borderRadius: "5px",
+                }}
+            >
+              <th>ID</th>
+              <th>Address</th>
+              <th className="desktop">Amount</th>
+              <th>Transaction</th>
+              <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            {requests.map((item, index) => {
+              return (
+                  <tr
+                      key={index}
+                      style={index % 2 !== 0 ? { background: "#1E1E1E" } : {}}
+                      className="table-content"
+                  >
+                    <td>{item.id}</td>
+                    <td className="desktop">
+                      {renderAddress(item.address, 18, 5)}
+                    </td>
+                    <td className="mobile">
+                      {renderAddress(item.address, 5, 5)}
+                    </td>
+                    <td className="desktop">{renderAmount(item.amount)}</td>
+                    <td>
+                      <a
+                          style={{ color: "#d8d8d8" }}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          href={`https://testnet.incognito.org/tx/${item.tx}`}
+                      >
+                        {renderAddress(item.tx, 5, 5)}
+                      </a>
+                    </td>
+                    {item.status === 0 && (
+                        <td style={{ color: "#FF9500" }}>Pending</td>
+                    )}
+                    {item.status === 1 && (
+                        <td style={{ color: "#0091FF" }}>Processing</td>
+                    )}
+                    {item.status === 2 && <td>Success</td>}
+                    {item.status === 3 && (
+                        <td style={{ color: "#E02020" }}>Fail</td>
+                    )}
+                  </tr>
+              );
+            })}
+            </tbody>
+          </table>
+        </div>
+    )
+  }
+  renderSubTitle() {
+    const message = isMainnet ? '' : 'Request a maximum of 10 testnet PRV per address, per 24 hours.'
+    return (
+        <p className="airdrop-rule">{message}</p>
+    )
+  }
   render() {
     const {
       error,
       creatingTx,
       address,
-      requests,
       isModalVisible,
       qrcode,
+      verified,
     } = this.state;
     return (
       <div className="root">
         {isModalVisible && (
           <div className="" id="modal">
             <div className="root-container header-container">
-              <img className="logo" src={"./logo.svg"} alt="logo"></img>
+              <img className="logo" src={"./logo.svg"} alt="logo" />
               <img
                 onClick={() => this.showModel(false)}
                 className="close"
                 src={"./close.svg"}
                 alt="close"
-              ></img>
+              />
             </div>
             {qrcode ? (
               <div className='root-camera'>
@@ -147,7 +254,7 @@ class App extends React.Component {
         )}
         <div className="root-container">
           <div className="header-container">
-            <img className="logo" src={"./logo.svg"} alt="logo"></img>
+            <img className="logo" src={"./logo.svg"} alt="logo" />
             <div>
               <div className="mobile-text">
                 <img
@@ -155,7 +262,7 @@ class App extends React.Component {
                   className="menu"
                   src={"./menu.svg"}
                   alt="menu"
-                ></img>
+                />
               </div>
               <div className="desktop-text">
                 <a className="btn-header" href="#top">
@@ -193,9 +300,7 @@ class App extends React.Component {
                 You can use it to build privacy{" "}
               </p>
               <p className="airdrop-label mobile-text">for the world. </p>
-              <p className="airdrop-rule">
-                Request a maximum of 10 testnet PRV per address, per 24 hours.{" "}
-              </p>
+              {this.renderSubTitle()}
               <Input
                 value={address}
                 className="input-address"
@@ -209,80 +314,31 @@ class App extends React.Component {
                 className="qrcode"
                 src={"./qrcode.svg"}
                 alt="logo"
-              ></img>
+              />
               {error !== "" && <p className="error-message">{error}</p>}
               <Button
                 size="large"
                 className="btn-faucet"
-                disabled={creatingTx}
+                disabled={creatingTx || !verified || !address}
                 onClick={async () => await this.faucet()}
               >
-                Give me testnet PRV
+                Give me PRV
               </Button>
+              <div className='wrapCaptcha'>
+                <ReCaptcha
+                    ref={(el) => {this.captchaRef = el;}}
+                    size="normal"
+                    data-theme="dark"
+                    render="explicit"
+                    sitekey={SITE_KEY}
+                    onloadCallback={this.onLoadRecaptcha}
+                    verifyCallback={this.verifyCallback}
+                />
+              </div>
             </div>
           </div>
         </div>
-        <div className="table-container">
-          <p className="request-queue">Request queue</p>
-          <table className="table-requests">
-            <thead>
-              <tr
-                style={{
-                  color: "white",
-                  height: "50px",
-                  background: "#1E1E1E",
-                  borderRadius: "5px",
-                }}
-              >
-                <th>ID</th>
-                <th>Address</th>
-                <th className="desktop">Amount</th>
-                <th>Transaction</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {requests.map((item, index) => {
-                return (
-                  <tr
-                    key={index}
-                    style={index % 2 !== 0 ? { background: "#1E1E1E" } : {}}
-                    className="table-content"
-                  >
-                    <td>{item.id}</td>
-                    <td className="desktop">
-                      {renderAddress(item.address, 18, 5)}
-                    </td>
-                    <td className="mobile">
-                      {renderAddress(item.address, 5, 5)}
-                    </td>
-                    <td className="desktop">{renderAmount(item.amount)}</td>
-                    <td>
-                      <a
-                        style={{ color: "#d8d8d8" }}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        href={`https://testnet.incognito.org/tx/${item.tx}`}
-                      >
-                        {renderAddress(item.tx, 5, 5)}
-                      </a>
-                    </td>
-                    {item.status === 0 && (
-                      <td style={{ color: "#FF9500" }}>Pending</td>
-                    )}
-                    {item.status === 1 && (
-                      <td style={{ color: "#0091FF" }}>Processing</td>
-                    )}
-                    {item.status === 2 && <td>Success</td>}
-                    {item.status === 3 && (
-                      <td style={{ color: "#E02020" }}>Fail</td>
-                    )}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        {this.renderRequestQueue()}
       </div>
     );
   }

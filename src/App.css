@@ -114,6 +114,13 @@
   background: #111111 !important;
 }
 
+.wrapCaptcha {
+  padding-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 input[type="text"]:focus {
   box-shadow: none;
 }
