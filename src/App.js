@@ -165,7 +165,7 @@ class App extends React.Component {
                           style={{ color: "#d8d8d8" }}
                           target="_blank"
                           rel="noopener noreferrer"
-                          href={`https://testnet.incognito.org/tx/${item.tx}`}
+                          href={`https://mainnet.incognito.org/tx/${item.tx}`}
                       >
                         {renderAddress(item.tx, 5, 5)}
                       </a>
@@ -189,7 +189,7 @@ class App extends React.Component {
     )
   }
   renderSubTitle() {
-    const message = isMainnet ? '' : 'Request a maximum of 10 testnet PRV per address, per 24 hours.'
+    const message = isMainnet ? '' : 'Request a maximum of 0.1 PRV per address, per 24 hours.'
     return (
         <p className="airdrop-rule">{message}</p>
     )
@@ -228,10 +228,7 @@ class App extends React.Component {
               </div>
               </div>
             ) : (
-              <div className="mobile-menu">
-                <a className="btn-header" href="#top">
-                  Testnet Faucet
-                </a>
+              <div className="mobile-menu"> 
                 <a
                   className="btn-header"
                   href="https://docs.incognito.org"
@@ -265,9 +262,7 @@ class App extends React.Component {
                 />
               </div>
               <div className="desktop-text">
-                <a className="btn-header" href="#top">
-                  Testnet Faucet
-                </a>
+                
                 <a
                   className="btn-header"
                   href="https://docs.incognito.org"
