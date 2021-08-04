@@ -2,7 +2,7 @@ FROM node:10.16.3 AS builder
 
 WORKDIR /app
 
-ENV REACT_APP_API_URL=https://api-faucet.incognito.org/
+ENV REACT_APP_API_URL=https://api-faucet.incognito.org
 ENV REACT_APP_IS_MAINNET=true
 
 COPY . .
