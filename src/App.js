@@ -228,10 +228,7 @@ class App extends React.Component {
               </div>
               </div>
             ) : (
-              <div className="mobile-menu">
-                <a className="btn-header" href="#top">
-                  Testnet Faucet
-                </a>
+              <div className="mobile-menu"> 
                 <a
                   className="btn-header"
                   href="https://docs.incognito.org"
@@ -265,9 +262,7 @@ class App extends React.Component {
                 />
               </div>
               <div className="desktop-text">
-                <a className="btn-header" href="#top">
-                  Testnet Faucet
-                </a>
+                
                 <a
                   className="btn-header"
                   href="https://docs.incognito.org"
