@@ -133,6 +133,7 @@ input[type="text"]:focus {
   color: lawngreen;
   margin-bottom: 0 !important;
   font-size: 15px !important;
+  line-break: anywhere;
 }
 .btn-faucet {
   margin-top: 50px !important;
