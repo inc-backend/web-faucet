@@ -16,6 +16,11 @@ const renderAddress = (address, left, right) => {
   const last = address.substring(address.length - right, address.length);
   return first + "..." + last;
 };
+
+const ERRORS_MAP = {
+  "checksum error" : "Invalid payment address (checksum error).",
+  "Limit 2 times to get PRV V2": "You can only request maximum 2 times per address."
+}
 class App extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -25,6 +30,7 @@ class App extends React.Component {
     creatingTx: false,
     show: false,
     error: "",
+    txID: "",
     isModalVisible: false,
     requests: [],
     verified: false
@@ -49,7 +55,19 @@ class App extends React.Component {
       requests: requests.data.Data,
     });
   };
+  getPaymentAddress = () => {
+    const pathName = window.location?.pathname;
+    if (!pathName) return;
+    const array = pathName.split('=')
+    if (array.length === 2 && array[0] === '/address' && array[1]) {
+      const searchAddress = array[1]
+      this.setState({
+        address: searchAddress
+      })
+    }
+  };
   async componentDidMount() {
+    this.getPaymentAddress()
     if (typeof loadReCaptcha === "function" && isMainnet) {
       return loadReCaptcha();
     }
@@ -79,7 +97,10 @@ class App extends React.Component {
         });
         const result = data?.data;
         const error = data?.data?.Error;
-        const errorMessage = data?.data?.Result;
+        let errorMessage = data?.data?.Result;
+        if (ERRORS_MAP[errorMessage]) {
+          errorMessage = ERRORS_MAP[errorMessage];
+        }
         if (error) {
           return reject({
             ...error,
@@ -95,7 +116,8 @@ class App extends React.Component {
       });
       // await this.getRequest();
       this.setState({
-        result: res && res.data,
+        result: res && res.Result,
+        txID: res && res.Result,
         creatingTx: false,
         error: "",
       });
@@ -202,6 +224,7 @@ class App extends React.Component {
       isModalVisible,
       qrcode,
       verified,
+      txID
     } = this.state;
     return (
       <div className="root">
@@ -228,7 +251,7 @@ class App extends React.Component {
               </div>
               </div>
             ) : (
-              <div className="mobile-menu"> 
+              <div className="mobile-menu">
                 <a
                   className="btn-header"
                   href="https://docs.incognito.org"
@@ -262,7 +285,7 @@ class App extends React.Component {
                 />
               </div>
               <div className="desktop-text">
-                
+
                 <a
                   className="btn-header"
                   href="https://docs.incognito.org"
@@ -311,13 +334,14 @@ class App extends React.Component {
                 alt="logo"
               />
               {error !== "" && <p className="error-message">{error}</p>}
+              {txID !== "" && <p className="success-message">{`txHash: ${txID}`}</p>}
               <Button
                 size="large"
                 className="btn-faucet"
                 disabled={creatingTx || !verified || !address}
                 onClick={async () => await this.faucet()}
               >
-                Give me PRV
+                {creatingTx ? 'Requesting' : 'Give me PRV'}
               </Button>
               <div className='wrapCaptcha'>
                 <ReCaptcha
