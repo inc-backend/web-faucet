@@ -3,7 +3,8 @@ import axios from "axios";
 import { Button, Input, notification } from "antd";
 import "./App.css";
 import QrReader from "react-qr-reader";
-import { loadReCaptcha, ReCaptcha } from 'react-recaptcha-google'
+// import { loadReCaptcha } from 'react-recaptcha-google'
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 
 const api = process.env.REACT_APP_API_URL;
 const isMainnet = process.env.REACT_APP_IS_MAINNET;
@@ -35,13 +36,8 @@ class App extends React.Component {
     requests: [],
     verified: false
   };
-  onLoadRecaptcha = () => {
-    if (this.captchaRef) {
-      this.captchaRef.reset();
-    }
-  }
-  verifyCallback = (recaptchaToken) => {
-    if (!recaptchaToken) return;
+  verifyCallback = (token) => {
+    if (!token) return;
     this.setState({
       verified: true,
     })
@@ -68,9 +64,7 @@ class App extends React.Component {
   };
   async componentDidMount() {
     this.getPaymentAddress()
-    if (typeof loadReCaptcha === "function" && isMainnet) {
-      return loadReCaptcha();
-    }
+    if (isMainnet) return;
     await this.getRequest();
   }
   showModel = (qrcode) => {
@@ -344,14 +338,9 @@ class App extends React.Component {
                 {creatingTx ? 'Requesting' : 'Give me PRV'}
               </Button>
               <div className='wrapCaptcha'>
-                <ReCaptcha
-                    ref={(el) => {this.captchaRef = el;}}
-                    size="normal"
-                    data-theme="dark"
-                    render="explicit"
-                    sitekey={SITE_KEY}
-                    onloadCallback={this.onLoadRecaptcha}
-                    verifyCallback={this.verifyCallback}
+                <HCaptcha
+                    sitekey="a152f009-fa38-4cca-8971-228b31e42ffd"
+                    onVerify={this.verifyCallback}
                 />
               </div>
             </div>

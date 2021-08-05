@@ -3,13 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@hcaptcha/react-hcaptcha": "^0.3.6",
     "add": "^2.0.6",
     "antd": "^4.2.0",
     "axios": "^0.19.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "react-qr-reader": "^2.2.1",
-    "react-recaptcha-google": "^1.1.1",
     "react-scripts": "3.0.1",
     "yarn": "^1.22.11"
   },
