@@ -11,7 +11,7 @@ const isMainnet = process.env.REACT_APP_IS_MAINNET;
 const renderAmount = (amount) => {
   return Number(amount) / 1e9;
 };
-const SITE_KEY = '6Lfo-tcbAAAAAGgrdrLFsBVywtGvQCg1K9yNMgTc';
+const SITE_KEY = 'a152f009-fa38-4cca-8971-228b31e42ffd';
 const renderAddress = (address, left, right) => {
   const first = address.substring(0, left);
   const last = address.substring(address.length - right, address.length);
@@ -20,7 +20,8 @@ const renderAddress = (address, left, right) => {
 
 const ERRORS_MAP = {
   "checksum error" : "Invalid payment address (checksum error).",
-  "Limit 2 times to get PRV V2": "You can only request maximum 2 times per address."
+  "Limit 2 times to get PRV V2": "You can only request maximum 2 times per address.",
+  "Robot verification failed, please try again.": "Robot verification failed, please reload page and try again"
 }
 class App extends React.Component {
   constructor(props, context) {
@@ -34,12 +35,14 @@ class App extends React.Component {
     txID: "",
     isModalVisible: false,
     requests: [],
-    verified: false
+    verified: false,
+    token: undefined,
   };
   verifyCallback = (token) => {
     if (!token) return;
     this.setState({
       verified: true,
+      token,
     })
   }
   getRequest = async () => {
@@ -76,7 +79,7 @@ class App extends React.Component {
       this.setState({
         creatingTx: true,
       });
-      const { address } = this.state;
+      const { address, token } = this.state;
       const res = await new Promise(async (resolve, reject) => {
         const data = await axios({
           method: "post",
@@ -87,6 +90,7 @@ class App extends React.Component {
           url: `${api}/tool/getprvv2`,
           data: {
             paymentaddress: address.trim(),
+            hcaptcharesponse: token
           },
         });
         const result = data?.data;
@@ -335,11 +339,11 @@ class App extends React.Component {
                 disabled={creatingTx || !verified || !address}
                 onClick={async () => await this.faucet()}
               >
-                {creatingTx ? 'Requesting' : 'Give me PRV'}
+                {creatingTx ? 'Requesting...' : 'Give me PRV'}
               </Button>
               <div className='wrapCaptcha'>
                 <HCaptcha
-                    sitekey="a152f009-fa38-4cca-8971-228b31e42ffd"
+                    sitekey={SITE_KEY}
                     onVerify={this.verifyCallback}
                 />
               </div>
