@@ -6,8 +6,8 @@ import QrReader from "react-qr-reader";
 // import { loadReCaptcha } from 'react-recaptcha-google'
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 
-const api = process.env.REACT_APP_API_URL;
-// const api = "https://api-coinservice.incognito.org/airdrop-service"
+// const api = process.env.REACT_APP_API_URL;
+const api = "https://api-coinservice.incognito.org/airdrop-service"
 
 const isMainnet = process.env.REACT_APP_IS_MAINNET;
 const renderAmount = (amount) => {
@@ -24,7 +24,12 @@ const renderAddress = (address, left, right) => {
   return first + "..." + last;
 };
 
-
+const Messages = {
+  "SOME_THING_ERROR": "Something went wrong, please reload page and try again",
+  "FAUCET_PENDING": "This faucet is Pending. Waiting for transaction confirm!",
+  "FAUCET_SUCESS": "This faucet is successfully. Waiting for transaction confirm!",
+  "CAMERA_PERMISSION": "Please allow camera permission for browser and this site."
+}
 
 const ERRORS_MAP = {
   "checksum error" : "Invalid payment address (checksum error).",
@@ -91,7 +96,7 @@ class App extends React.Component {
 
     if (typeof error === "string") return error
 
-    const errorMessage = error.response?.data?.Error || "Something went wrong";
+    const errorMessage = error.response?.data?.Error || Messages.SOME_THING_ERROR;
     if (errorMessage) {
       notification.error({
         message: "Error",
@@ -102,6 +107,7 @@ class App extends React.Component {
   }
 
   faucet = async () => {
+    let that = this
     try {
       this.setState({
         creatingTx: true,
@@ -131,14 +137,14 @@ class App extends React.Component {
             let message = ""
             switch (result) {
               case -1:
-                message = "Something went wrong, please reload page and try again"
+                message = Messages.SOME_THING_ERROR
                 notification.error({
                   message: "Error",
                   description: message});
                 return reject({message})
               case 0: 
 
-                message = "Something went wrong, please reload page and try again"
+                message = Messages.SOME_THING_ERROR
                 notification.error({
                   message: "Unknow",
                   description: message,
@@ -146,7 +152,7 @@ class App extends React.Component {
                 return reject({message})
 
               case 1: 
-                message = "This faucet is Pending. Waiting for transaction confirm!"
+                message = Messages.FAUCET_PENDING
                 notification.info({
                   message: "Pending",
                   description: message,
@@ -154,18 +160,18 @@ class App extends React.Component {
                 return resolve({message})
 
               case 2: 
-                message = "This faucet is successfully. Waiting for transaction confirm!"
+                message = Messages.FAUCET_SUCESS
                 notification.success({
                   message: "Successfully",
-                  description:
-                    "This faucet is successfully. Waiting for transaction confirm!",
+                  description: message,
                 });
                 return resolve({message})
               default:
                 break;
             }
           } catch (error) {
-            const errorMessage = this.handleAPIError(error)
+            alert("111 " + JSON.stringify(error))
+            const errorMessage = that.handleAPIError(error)
             reject(errorMessage)
           }
         });
@@ -197,7 +203,7 @@ class App extends React.Component {
     }
   };
   handleError = (err) => {
-    alert("Please allow camera permission for browser and this site.");
+    alert(Messages.CAMERA_PERMISSION);
     console.error(err);
   };
   renderRequestQueue = () => {
@@ -221,7 +227,7 @@ class App extends React.Component {
               <th className="desktop">Amount</th>
               <th>Transaction</th>
               <th>Status</th>
-            </tr>
+            </tr> 
             </thead>
             <tbody>
             {requests.map((item, index) => {
