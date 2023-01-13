@@ -114,7 +114,6 @@ class App extends React.Component {
       });
       const { address, token } = this.state;
       const url = `${api}/faucet`
-      console.log("url ", url)
 
       const payload = {
         paymentaddress: address.trim(),
@@ -170,7 +169,6 @@ class App extends React.Component {
                 break;
             }
           } catch (error) {
-            alert("111 " + JSON.stringify(error))
             const errorMessage = that.handleAPIError(error)
             reject(errorMessage)
           }

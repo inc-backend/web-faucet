@@ -2,6 +2,7 @@ FROM node:10.16.3 AS builder
 
 WORKDIR /app
 
+# ENV REACT_APP_API_URL=http://api-faucet
 ENV REACT_APP_API_URL=https://api-coinservice.incognito.org/airdrop-service
 ENV REACT_APP_IS_MAINNET=true
 
