@@ -7,6 +7,8 @@ import QrReader from "react-qr-reader";
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 
 const api = process.env.REACT_APP_API_URL;
+const siteKey = process.env.REACT_APP_SITE_KEY;
+
 // const api = "https://api-coinservice.incognito.org/airdrop-service"
 
 const isMainnet = process.env.REACT_APP_IS_MAINNET;
@@ -15,7 +17,7 @@ const renderAmount = (amount) => {
 };
 
 // const SITE_KEY = 'a152f009-fa38-4cca-8971-228b31e42ffd';
-const SITE_KEY = 'd7d67196-a41f-4a41-b56c-febefb1c2211'; //New Key 
+const SITE_KEY = siteKey || 'd7d67196-a41f-4a41-b56c-febefb1c2211'; //New Key 
 // const SITE_KEY = '10000000-ffff-ffff-ffff-000000000001'; //Test
 
 const renderAddress = (address, left, right) => {
