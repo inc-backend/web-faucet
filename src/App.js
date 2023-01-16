@@ -6,17 +6,30 @@ import QrReader from "react-qr-reader";
 // import { loadReCaptcha } from 'react-recaptcha-google'
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 
-const api = process.env.REACT_APP_API_URL;
+// const api = process.env.REACT_APP_API_URL;
+const api = "https://api-coinservice.incognito.org/airdrop-service"
+
 const isMainnet = process.env.REACT_APP_IS_MAINNET;
 const renderAmount = (amount) => {
   return Number(amount) / 1e9;
 };
-const SITE_KEY = 'a152f009-fa38-4cca-8971-228b31e42ffd';
+
+// const SITE_KEY = 'a152f009-fa38-4cca-8971-228b31e42ffd';
+const SITE_KEY = 'd7d67196-a41f-4a41-b56c-febefb1c2211'; //New Key 
+// const SITE_KEY = '10000000-ffff-ffff-ffff-000000000001'; //Test
+
 const renderAddress = (address, left, right) => {
   const first = address.substring(0, left);
   const last = address.substring(address.length - right, address.length);
   return first + "..." + last;
 };
+
+const Messages = {
+  "SOME_THING_ERROR": "Something went wrong, please reload page and try again",
+  "FAUCET_PENDING": "This faucet is Pending. Waiting for transaction confirm!",
+  "FAUCET_SUCESS": "This faucet is successfully. Waiting for transaction confirm!",
+  "CAMERA_PERMISSION": "Please allow camera permission for browser and this site."
+}
 
 const ERRORS_MAP = {
   "checksum error" : "Invalid payment address (checksum error).",
@@ -54,6 +67,7 @@ class App extends React.Component {
       requests: requests.data.Data,
     });
   };
+
   getPaymentAddress = () => {
     const pathName = window.location?.pathname;
     if (!pathName) return;
@@ -65,57 +79,106 @@ class App extends React.Component {
       })
     }
   };
+
   async componentDidMount() {
     this.getPaymentAddress()
     if (isMainnet) return;
-    await this.getRequest();
+    // await this.getRequest();
   }
+
   showModel = (qrcode) => {
     const { isModalVisible } = this.state;
     this.setState({ isModalVisible: !isModalVisible, qrcode });
   };
+
+  handleAPIError = (error) => {
+    if (!error) return;
+
+    if (typeof error === "string") return error
+
+    const errorMessage = error.response?.data?.Error || Messages.SOME_THING_ERROR;
+    if (errorMessage) {
+      notification.error({
+        message: "Error",
+        description: errorMessage,
+      });
+    }
+    return errorMessage
+  }
+
   faucet = async () => {
+    let that = this
     try {
       this.setState({
         creatingTx: true,
       });
       const { address, token } = this.state;
-      const res = await new Promise(async (resolve, reject) => {
-        const data = await axios({
-          method: "post",
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': '',
-          },
-          url: `${api}/tool/getprvv2`,
-          data: {
-            paymentaddress: address.trim(),
-            hcaptcharesponse: token
-          },
+      const url = `${api}/faucet`
+
+      const payload = {
+        paymentaddress: address.trim(),
+        captcha: token
+      }
+      let data;
+      try {
+          data = await new Promise(async (resolve, reject) => {
+          try {
+            const apiResponse = await axios({
+              method: "post",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              url: url,
+              data: payload,
+            });
+
+            const result = apiResponse?.data.Result
+            let message = ""
+            switch (result) {
+              case -1:
+                message = Messages.SOME_THING_ERROR
+                notification.error({
+                  message: "Error",
+                  description: message});
+                return reject({message})
+              case 0: 
+
+                message = Messages.SOME_THING_ERROR
+                notification.error({
+                  message: "Unknow",
+                  description: message,
+                });
+                return reject({message})
+
+              case 1: 
+                message = Messages.FAUCET_PENDING
+                notification.info({
+                  message: "Pending",
+                  description: message,
+                });
+                return resolve({message})
+
+              case 2: 
+                message = Messages.FAUCET_SUCESS
+                notification.success({
+                  message: "Successfully",
+                  description: message,
+                });
+                return resolve({message})
+              default:
+                break;
+            }
+          } catch (error) {
+            const errorMessage = that.handleAPIError(error)
+            reject(errorMessage)
+          }
         });
-        const result = data?.data;
-        const error = data?.data?.Error;
-        let errorMessage = data?.data?.Result;
-        if (ERRORS_MAP[errorMessage]) {
-          errorMessage = ERRORS_MAP[errorMessage];
-        }
-        if (error) {
-          return reject({
-            ...error,
-            errorMessage,
-          })
-        }
-        return resolve(result)
-      });
-      notification.success({
-        message: "Successfully",
-        description:
-          "This faucet is successfully. Waiting for transaction confirm!",
-      });
-      // await this.getRequest();
+      } catch (error) {
+        // this.handleAPIError(error)
+      }
       this.setState({
-        result: res && res.Result,
-        txID: res && res.Result,
+        result: data && data.Result,
+        txID: data && data.Result,
         creatingTx: false,
         error: "",
       });
@@ -138,7 +201,7 @@ class App extends React.Component {
     }
   };
   handleError = (err) => {
-    alert("Please allow camera permission for browser and this site.");
+    alert(Messages.CAMERA_PERMISSION);
     console.error(err);
   };
   renderRequestQueue = () => {
@@ -162,7 +225,7 @@ class App extends React.Component {
               <th className="desktop">Amount</th>
               <th>Transaction</th>
               <th>Status</th>
-            </tr>
+            </tr> 
             </thead>
             <tbody>
             {requests.map((item, index) => {
@@ -331,8 +394,8 @@ class App extends React.Component {
                 src={"./qrcode.svg"}
                 alt="logo"
               />
-              {error !== "" && <p className="error-message">{error}</p>}
-              {txID !== "" && <p className="success-message">{`txHash: ${txID}`}</p>}
+              {error && error !== "" && <p className="error-message">{error}</p>}
+              {txID && txID !== "" && <p className="success-message">{`txHash: ${txID}`}</p>}
               <Button
                 size="large"
                 className="btn-faucet"
@@ -350,7 +413,7 @@ class App extends React.Component {
             </div>
           </div>
         </div>
-        {this.renderRequestQueue()}
+        {/* {this.renderRequestQueue()} */}
       </div>
     );
   }
