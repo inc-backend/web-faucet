@@ -6,8 +6,8 @@ import QrReader from "react-qr-reader";
 // import { loadReCaptcha } from 'react-recaptcha-google'
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 
-// const api = process.env.REACT_APP_API_URL;
-const api = "https://api-coinservice.incognito.org/airdrop-service"
+const api = process.env.REACT_APP_API_URL;
+// const api = "https://api-coinservice.incognito.org/airdrop-service"
 
 const isMainnet = process.env.REACT_APP_IS_MAINNET;
 const renderAmount = (amount) => {
