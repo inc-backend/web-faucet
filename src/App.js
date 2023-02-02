@@ -381,7 +381,7 @@ class App extends React.Component {
                 You can use it to build privacy{" "}
               </p>
               <p className="airdrop-label mobile-text">for the world. </p>
-              {this.renderSubTitle()}
+              {/* {this.renderSubTitle()} */}
               <Input
                 value={address}
                 className="input-address"
